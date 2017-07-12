@@ -30,7 +30,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements FlowerArrayAdapter.OnItemClicked{
 
     public static final String BASE_URL = "http://services.hanselandpetal.com";
     private Retrofit retrofit;
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         // #6
         flowersList = new ArrayList<>(); // tworzymy liste
         // #9
-        flowerArrayAdapter = new FlowerArrayAdapter(this, flowersList); // tworzymy adapter
+        flowerArrayAdapter = new FlowerArrayAdapter(this, flowersList, this); // tworzymy adapter
         listView.setAdapter(flowerArrayAdapter);
     }
 
@@ -138,5 +138,15 @@ public class MainActivity extends AppCompatActivity {
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
                 .setLenient()
                 .create();
+    }
+
+    @Override
+    public void onRowClicked(Flower flower) {
+        showToast("Kliknałeś: " + flower.getName());
+    }
+
+    @Override
+    public void onPiceClicked(Flower flower) {
+        showToast(flower.getName() + " jest za drogi!");
     }
 }

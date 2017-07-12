@@ -27,13 +27,15 @@ public class FlowerArrayAdapter extends ArrayAdapter<Flower> {
     private final LayoutInflater inflater;
     private final int imageSizePixels;
     private List<Flower> flowerList;
+    private OnItemClicked onItemClicked;
 
-    public FlowerArrayAdapter(Context context, List<Flower> flowerList) {
+    public FlowerArrayAdapter(Context context, List<Flower> flowerList, OnItemClicked onItemClicked) {
         super(context, R.layout.flower_item);
         // pojedynczy widok widok
         inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.flowerList = flowerList;
+        this.onItemClicked = onItemClicked;
 
         imageSizePixels = context.getResources().getDimensionPixelSize(R.dimen.image_size);
     }
@@ -48,11 +50,18 @@ public class FlowerArrayAdapter extends ArrayAdapter<Flower> {
     @NonNull
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Flower flower = flowerList.get(position);
+        final Flower flower = flowerList.get(position);
 
         View rowView = convertView;
         if(rowView == null)
             rowView = inflater.inflate(R.layout.flower_item, parent, false);
+
+        rowView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setOnRowClickListener(view, flower);
+            }
+        });
 
         TextView nameText = (TextView) rowView.findViewById(R.id.flowerItem_nameText);
         TextView priceText = (TextView) rowView.findViewById(R.id.flowerItem_prizeText);
@@ -68,7 +77,26 @@ public class FlowerArrayAdapter extends ArrayAdapter<Flower> {
                 .centerCrop()
                 .into(flowerImage);
 
+        priceText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setOnPriceClickListener(view, flower);
+            }
+        });
+
         return rowView;
+    }
+
+    private void setOnPriceClickListener(View view, Flower flower) {
+        if (view != null) {
+            onItemClicked.onPiceClicked(flower); // klikniecie na cene
+        }
+    }
+
+    private void setOnRowClickListener(View view, Flower flower) {
+        if (view != null) {
+            onItemClicked.onRowClicked(flower); // klikniecie na caly element
+        }
     }
 
     @Override
@@ -81,5 +109,10 @@ public class FlowerArrayAdapter extends ArrayAdapter<Flower> {
         return flowerList.isEmpty();
     }
 
+    // co sie dzieje z Flower
+    public interface OnItemClicked {
+        void onRowClicked(Flower flower);
+        void onPiceClicked(Flower flower);
+    }
 
 }
