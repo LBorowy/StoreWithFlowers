@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -13,10 +14,13 @@ import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import pl.lborowy.storewithflowers.adapters.FlowerArrayAdapter;
 import pl.lborowy.storewithflowers.models.Flower;
 import pl.lborowy.storewithflowers.services.FlowersApi;
 import retrofit2.Call;
@@ -32,27 +36,34 @@ public class MainActivity extends AppCompatActivity {
     private Retrofit retrofit;
     private FlowersApi flowersApi;
     private List<Flower> flowersList;
+    private FlowerArrayAdapter flowerArrayAdapter;
+
+    // #7
+    @BindView(R.id.listView_mainActivity)
+    ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
+
+        prepareRetrofit();
+//        getFlowersRetrofit();
+        prepareAdapter();
+        getFlowersRxJava();
+    }
+
+    private void prepareAdapter() {
         // #6
-        flowersList = new ArrayList<>();
-        // #1 Retrofit
-        retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create(getGson()))
-                // #5
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create()) // dopiero teraz możemy zwracać Observable
-                .build();
+        flowersList = new ArrayList<>(); // tworzymy liste
+        // #9
+        flowerArrayAdapter = new FlowerArrayAdapter(this, flowersList); // tworzymy adapter
+        listView.setAdapter(flowerArrayAdapter);
+    }
 
-        //  /feeds/flowers.json
-
-        // #4
-        flowersApi = retrofit.create(FlowersApi.class);
-
+//    private void getFlowersRetrofit() {
 //        // retrofit - pobieranie kwiatków
 //        flowersApi.getAllFlowers().enqueue(new Callback<List<Flower>>() {
 //            @Override
@@ -65,7 +76,9 @@ public class MainActivity extends AppCompatActivity {
 //                showToast("fail");
 //            }
 //        });
+//    }
 
+    private void getFlowersRxJava() {
         // rxJaxa - pobieranie kwiatków
         flowersApi.getAllFlowersRxJava()
                 .subscribeOn(Schedulers.io())
@@ -81,6 +94,8 @@ public class MainActivity extends AppCompatActivity {
 //                        MainActivity.this.flowersList = flowers;
                         // #6
                         flowersList.addAll(flowers);
+                        // po stworzeniu arrayadaptera
+                        flowerArrayAdapter.notifyDataSetChanged();
                         Log.d("RxJava", "New flowers!" + flowers.size());
                     }
 
@@ -95,6 +110,21 @@ public class MainActivity extends AppCompatActivity {
                         showToast("DONE!");
                     }
                 });
+    }
+
+    private void prepareRetrofit() {
+        // #1 Retrofit
+        retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create(getGson()))
+                // #5
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create()) // dopiero teraz możemy zwracać Observable
+                .build();
+
+        //  /feeds/flowers.json
+
+        // #4
+        flowersApi = retrofit.create(FlowersApi.class);
     }
 
     private void showToast(String message) {

@@ -15,6 +15,11 @@ public class Flower {
     String name;
     Long productId;
 
+    // picasso
+    public String getPfotoUrl() {
+        return "http://services.hanselandpetal.com/photos/" + getPhoto();
+    }
+
     public String getCategory() {
         return category;
     }
