@@ -13,6 +13,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import pl.lborowy.storewithflowers.R;
 import pl.lborowy.storewithflowers.models.Flower;
 
@@ -53,7 +55,7 @@ public class FlowerArrayAdapter extends ArrayAdapter<Flower> {
         final Flower flower = flowerList.get(position);
 
         View rowView = convertView;
-        if(rowView == null)
+        if (rowView == null)
             rowView = inflater.inflate(R.layout.flower_item, parent, false);
 
         rowView.setOnClickListener(new View.OnClickListener() {
@@ -63,21 +65,27 @@ public class FlowerArrayAdapter extends ArrayAdapter<Flower> {
             }
         });
 
-        TextView nameText = (TextView) rowView.findViewById(R.id.flowerItem_nameText);
-        TextView priceText = (TextView) rowView.findViewById(R.id.flowerItem_prizeText);
-        ImageView flowerImage = (ImageView) rowView.findViewById(R.id.flowerItem_imageView);
+        ViewHolder holder = (ViewHolder) rowView.getTag();
+        if (holder == null) {
+            holder = new ViewHolder(rowView);
+            rowView.setTag(holder);
+        }
 
-        nameText.setText(flower.getName());
-        priceText.setText(String.format("%.2f $", flower.getPrice()));
+//        TextView nameText = (TextView) rowView.findViewById(R.id.flowerItem_nameText);
+//        TextView priceText = (TextView) rowView.findViewById(R.id.flowerItem_prizeText);
+//        ImageView flowerImage = (ImageView) rowView.findViewById(R.id.flowerItem_imageView);
+
+        holder.nameText.setText(flower.getName());
+        holder.priceText.setText(String.format("%.2f $", flower.getPrice()));
 //        flowerImage.setImageResource(Integer.parseInt("http://services.hanselandpetal.com/photos/" + flower.getPhoto()));
 
         Picasso.with(getContext())
                 .load(flower.getPfotoUrl())
                 .resize(imageSizePixels, imageSizePixels)
                 .centerCrop()
-                .into(flowerImage);
+                .into(holder.flowerImage);
 
-        priceText.setOnClickListener(new View.OnClickListener() {
+        holder.priceText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 setOnPriceClickListener(view, flower);
@@ -89,7 +97,7 @@ public class FlowerArrayAdapter extends ArrayAdapter<Flower> {
 
     private void setOnPriceClickListener(View view, Flower flower) {
         if (view != null) {
-            onItemClicked.onPiceClicked(flower); // klikniecie na cene
+            onItemClicked.onPriceClicked(flower); // klikniecie na cene
         }
     }
 
@@ -112,7 +120,23 @@ public class FlowerArrayAdapter extends ArrayAdapter<Flower> {
     // co sie dzieje z Flower
     public interface OnItemClicked {
         void onRowClicked(Flower flower);
-        void onPiceClicked(Flower flower);
+
+        void onPriceClicked(Flower flower);
+    }
+
+    class ViewHolder {
+        @BindView(R.id.flowerItem_nameText)
+        TextView nameText;
+
+        @BindView(R.id.flowerItem_prizeText)
+        TextView priceText;
+
+        @BindView(R.id.flowerItem_imageView)
+        ImageView flowerImage;
+
+        public ViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
     }
 
 }

@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements FlowerArrayAdapte
     }
 
     @Override
-    public void onPiceClicked(Flower flower) {
+    public void onPriceClicked(Flower flower) {
         showToast(flower.getName() + " jest za drogi!");
     }
 }
